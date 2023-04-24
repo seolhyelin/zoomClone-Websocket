@@ -19,4 +19,10 @@ const server = http.createServer(app);
 // websocket 서버만 동작 시키려면 괄호 안에 안넣어도 됨
 const wss = new WebSocket.Server({ server });
 
+function handleConnection(socket) {
+  console.log(socket);
+}
+
+wss.on("connection", handleConnection);
+
 server.listen(3000, handleListen);
