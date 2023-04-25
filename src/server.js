@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import WebSocket from "ws";
-
+import SocketIO from "socket.io";
 const app = express();
 
 app.set("view engine", "pug");
@@ -14,31 +14,33 @@ app.get("/*", (req, res) => res.redirect("/"));
 const handleListen = () =>
   console.log("http://localhost:3000, ws://localhost:3000");
 
-// http 서버 위에 ws 서버를 만듦
-const server = http.createServer(app);
-// websocket 서버만 동작 시키려면 괄호 안에 안넣어도 됨
-const wss = new WebSocket.Server({ server });
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const sockets = [];
-
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket["nickname"] = "Anon";
-  console.log("Connected to Browser");
-  socket.on("close", () => {
-    console.log("Disconnected to Browser ❌");
-  });
-  socket.on("message", (msg) => {
-    const message = JSON.parse(msg);
-    switch (message.type) {
-      case "new_message":
-        sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.nickname} : ${message.payload}`)
-        );
-      case "nickname":
-        socket["nickname"] = message.payload;
-    }
-  });
+wsServer.on("connection", (socket) => {
+  console.log(socket);
 });
 
-server.listen(3000, handleListen);
+// wss= new WebSocket.Server({httpServer})
+// const sockets = [];
+// wss.on("connection", (socket) => {
+//   sockets.push(socket);
+//   socket["nickname"] = "Anon";
+//   console.log("Connected to Browser");
+//   socket.on("close", () => {
+//     console.log("Disconnected to Browser ❌");
+//   });
+//   socket.on("message", (msg) => {
+//     const message = JSON.parse(msg);
+//     switch (message.type) {
+//       case "new_message":
+//         sockets.forEach((aSocket) =>
+//           aSocket.send(`${socket.nickname} : ${message.payload}`)
+//         );
+//       case "nickname":
+//         socket["nickname"] = message.payload;
+//     }
+//   });
+// });
+
+httpServer.listen(3000, handleListen);
