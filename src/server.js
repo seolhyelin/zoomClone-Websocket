@@ -19,15 +19,18 @@ const server = http.createServer(app);
 // websocket 서버만 동작 시키려면 괄호 안에 안넣어도 됨
 const wss = new WebSocket.Server({ server });
 
+const sockets = [];
+
 wss.on("connection", (socket) => {
+  sockets.push(socket);
   console.log("Connected to Browser");
   socket.on("close", () => {
     console.log("Disconnected to Browser ❌");
   });
   socket.on("message", (message) => {
     console.log(message.toString("utf8"));
+    sockets.forEach((aSocket) => aSocket.send(message.toString("utf8")));
   });
-  socket.send("hello!!");
 });
 
 server.listen(3000, handleListen);
